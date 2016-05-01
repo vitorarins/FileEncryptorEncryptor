@@ -1,6 +1,7 @@
 package br.ufsc;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
@@ -13,7 +14,11 @@ public class Main {
 //        System.out.println("Digite o diretório que deve ser cifrado: ");
 //        dirName = input.nextLine();
 
-        FileOperations.initTable(dirName);
+        try {
+            FileOperations.decryptFiles(dirName);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 //        String key;
 //        System.out.println("Digite a chave que você deseja usar para cifrar o arquivo: ");
