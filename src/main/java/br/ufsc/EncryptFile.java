@@ -23,8 +23,7 @@ public class EncryptFile {
     public static void decryptFile(String key, String fileName) {
 
         String fileExtension = fileName.substring(fileName.lastIndexOf('.'), fileName.length());
-        int firstDotIndex = fileName.indexOf('.');
-        String fileNameWithoutExtension = fileName.substring(0, fileName.indexOf('.',firstDotIndex+1));
+        String fileNameWithoutExtension = fileName.substring(0, fileName.indexOf('.'));
         File inputFile = new File(fileName);
         File decryptedFile = new File(fileNameWithoutExtension + fileExtension);
 

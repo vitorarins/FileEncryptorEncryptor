@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Created by vitor on 4/29/16.
- */
 public class FileOperations {
 
     private static final String TABLE_FILE_NAME = ".FETable";
@@ -18,12 +15,17 @@ public class FileOperations {
         File directory = new File(dirName);
         List<File> listOfFiles = new ArrayList<>(Arrays.asList(directory.listFiles()));
         List<File> filesToRemove = new ArrayList<>();
+        List<File> filesToAdd = new ArrayList<>();
         for (File file: listOfFiles) {
             if (file.isDirectory()) {
-                listOfFiles.addAll(getAllFilenamesFromDir(dirName + File.separator + file.getName()));
+                filesToAdd.addAll(getAllFilenamesFromDir(dirName + File.separator + file.getName()));
+                filesToRemove.add(file);
+            }
+            if (file.getName().equals(TABLE_FILE_NAME)) {
                 filesToRemove.add(file);
             }
         }
+        listOfFiles.addAll(filesToAdd);
         listOfFiles.removeAll(filesToRemove);
 
         return listOfFiles;
