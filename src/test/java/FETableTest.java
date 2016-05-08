@@ -19,7 +19,7 @@ public class FETableTest {
         otherDir.mkdir();
         Path table = Paths.get(ROOT_ENCRYPT_DIR + ".FETable");
         List<String> linesOfTable = Arrays.asList(
-                "",
+                "mega sena",
                 "macaco",
                 "martelos");
         try {
