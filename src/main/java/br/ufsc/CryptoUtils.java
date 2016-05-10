@@ -13,6 +13,74 @@ public class CryptoUtils {
     private static final String ALGORITHM = "AES";
     private static final String TRANSFORMATION = "AES/CBC/PKCS5Padding";
 
+    public static String generateTableDPK(String password) {
+        PBKDF2Util pbkdf2Util = new PBKDF2Util();
+        String salt = "51d3a303e3e25f8aa143b0f7782550fe";
+        int it = 10000;
+
+        return pbkdf2Util.generateDerivedKey(password, salt, it);
+    }
+
+    public static String generateKey(String password) {
+        PBKDF2Util pbkdf2Util = new PBKDF2Util();
+        String salt = null;
+        int it = 10000;
+
+        try {
+            salt = pbkdf2Util.getSalt();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        return pbkdf2Util.generateDerivedKey(password, salt, it);
+    }
+
+    public static String hMac(String password, String fileName) throws Exception {
+        String keyString = generateTableDPK(password);
+        Key key = new SecretKeySpec(keyString.getBytes(),0,keyString.getBytes().length, "DES");
+        Mac hMac = Mac.getInstance("HMacSHA256", "BC");
+        Key hMacKey = new SecretKeySpec(key.getEncoded(), "HMacSHA256");
+        hMac.init(hMacKey);
+        byte[] macText = hMac.doFinal(toByteArray(fileName));
+
+        return toHex(macText);
+    }
+
+    public static String byteArrayToString(byte[] bytes) {
+        char[] chars = new char[bytes.length];
+
+        for (int i = 0; i != chars.length; i++) {
+            chars[i] = (char)(bytes[i] & 0xff);
+        }
+
+        return new String(chars);
+    }
+
+    public static byte[] toByteArray(String string) {
+        byte[] bytes = new byte[string.length()];
+        char[] chars = string.toCharArray();
+
+        for (int i = 0; i != chars.length; i++) {
+            bytes[i] = (byte)chars[i];
+        }
+
+        return bytes;
+    }
+
+    public static String toHex(byte[] data) {
+        String digits = "0123456789abcdef";
+        StringBuffer buf = new StringBuffer();
+
+        for (int i = 0; i != data.length; i++) {
+            int	v = data[i] & 0xff;
+
+            buf.append(digits.charAt(v >> 4));
+            buf.append(digits.charAt(v & 0xf));
+        }
+
+        return buf.toString();
+    }
+
     private static IvParameterSpec generateIv() throws NoSuchProviderException, NoSuchAlgorithmException {
 
         byte iv[] = new byte[16];

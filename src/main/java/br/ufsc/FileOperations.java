@@ -31,34 +31,54 @@ public class FileOperations {
         return listOfFiles;
     }
 
-    public static void encryptFiles(String dirName) throws IOException {
+    public static void encryptFiles(String dirName, String password) throws IOException {
 
         File tableFile = new File(dirName + File.separator + TABLE_FILE_NAME);
         if (!tableFile.exists()) {
             tableFile.createNewFile();
         }
 
+        FETable feTable = new FETable(password);
+        feTable.loadTableFromDir(dirName);
+
         List<File> list = getAllFilenamesFromDir(dirName);
-        String key = "1234567890123456";
 
         for (File theFile : list) {
             if (!TABLE_FILE_NAME.equals(theFile.getName())) {
-                EncryptFile.encryptFile(key, theFile.getAbsolutePath());
+                String fileName = theFile.getPath();
+                String key = feTable.getKeyFromFile(fileName);
+                if (key == null) {
+                    key = feTable.setKeyForFile(fileName);
+                }
+                EncryptFile.encryptFile(key, fileName);
                 theFile.delete();
+            }
+        }
+
+        feTable.writeTableToDir(dirName, password);
+    }
+
+    public static void decryptFiles(String dirName, String password) throws IOException {
+
+        List<File> list = getAllFilenamesFromDir(dirName);
+
+        FETable feTable = new FETable(password);
+        feTable.loadTableFromDir(dirName);
+
+        for (File theFile : list) {
+            if (!TABLE_FILE_NAME.equals(theFile.getName())) {
+                String fileName = cleanName(theFile.getPath());
+                String key = feTable.getKeyFromFile(fileName);
+                if (key != null) {
+                    EncryptFile.decryptFile(key, theFile.getPath());
+                    theFile.delete();
+                }
             }
         }
     }
 
-    public static void decryptFiles(String dirName) throws IOException {
-
-        List<File> list = getAllFilenamesFromDir(dirName);
-        String key = "1234567890123456";
-
-        for (File theFile : list) {
-            if (!TABLE_FILE_NAME.equals(theFile.getName())) {
-                EncryptFile.decryptFile(key, theFile.getAbsolutePath());
-                theFile.delete();
-            }
-        }
+    public static String cleanName(String name) {
+        int startOfWord = name.indexOf("encrypted");
+        return name.substring(0, startOfWord) + name.substring(startOfWord + 10, name.length());
     }
 }

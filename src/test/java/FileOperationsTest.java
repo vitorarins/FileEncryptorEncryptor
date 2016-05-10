@@ -1,5 +1,6 @@
 import br.ufsc.FileOperations;
 import org.apache.commons.io.FileUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -12,6 +13,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +29,9 @@ public class FileOperationsTest {
     @Before
     public void setUpFiles() {
         try {
+            // Instanciar um novo Security provider
+            int addProvider = Security.addProvider(new BouncyCastleProvider());
+
             String treeOfDirs = ROOT_ENCRYPT_DIR + "dirCeption" + File.separator + "fileCeptions"
                     + File.separator + "lalalal" + File.separator + "bizarro";
             File dirToEncrypt = new File(treeOfDirs);
@@ -72,7 +77,7 @@ public class FileOperationsTest {
     }
 
     @Test
-    public void testGetAllFileNamesFromDipr() {
+    public void testGetAllFileNamesFromDir() {
 
         File[] expectedFileNames = {
                 new File(ROOT_ENCRYPT_DIR + "otherTest.txt"),
@@ -111,7 +116,7 @@ public class FileOperationsTest {
         };
         List<File> expectedListOfFiles = new ArrayList<>(Arrays.asList(expectedFileNames));
         try {
-            FileOperations.encryptFiles(ROOT_ENCRYPT_DIR);
+            FileOperations.encryptFiles(ROOT_ENCRYPT_DIR, "senha");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -138,8 +143,8 @@ public class FileOperationsTest {
         List<File> expectedListOfFiles = new ArrayList<>(Arrays.asList(expectedFileNames));
         List<String> tableContent = mountTableContent(expectedListOfFiles);
         try {
-            FileOperations.encryptFiles(ROOT_ENCRYPT_DIR);
-            FileOperations.decryptFiles(ROOT_ENCRYPT_DIR);
+            FileOperations.encryptFiles(ROOT_ENCRYPT_DIR, "senha");
+            FileOperations.decryptFiles(ROOT_ENCRYPT_DIR, "senha");
         } catch (IOException e) {
             e.printStackTrace();
         }
