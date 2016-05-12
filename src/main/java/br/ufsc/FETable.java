@@ -1,7 +1,7 @@
 package br.ufsc;
 
+import javax.crypto.spec.IvParameterSpec;
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,6 +16,7 @@ public class FETable {
     private final String TABLE_FILE_NAME = ".FETable";
     private final String password;
     private HashMap<String,String> keyTable;
+    private String storedIv;
 
     public FETable(String password) {
         this.password = password;
@@ -23,6 +24,15 @@ public class FETable {
 
     public HashMap<String, String> getKeyTable() {
         return keyTable;
+    }
+
+    public void createNewStoredIv() {
+        try {
+            IvParameterSpec ivSpec = CryptoUtils.generateIv();
+            storedIv = CryptoUtils.toHex(ivSpec.getIV());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public String getKeyFromFile(String fileName) {
@@ -33,7 +43,8 @@ public class FETable {
             e.printStackTrace();
         }
         if (keyTable.containsKey(fileNameMac)) {
-            return keyTable.get(fileNameMac);
+            String encryptedKey = keyTable.get(fileNameMac);
+            return CryptoUtils.doCryptoWithGCM(false,password,encryptedKey,storedIv);
         }
 
         return null;
@@ -41,13 +52,15 @@ public class FETable {
 
     public String setKeyForFile(String fileName) {
         String key = CryptoUtils.generateKey(password);
+        String encryptedKey = null;
         String fileNameMac = null;
         try {
             fileNameMac= CryptoUtils.hMac(password, fileName);
+            encryptedKey = CryptoUtils.doCryptoWithGCM(true,password,key,storedIv);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        keyTable.put(fileNameMac, key);
+        keyTable.put(fileNameMac, encryptedKey);
         return key;
     }
 
@@ -61,7 +74,7 @@ public class FETable {
         }
     }
 
-    public void writeTableToDir(String dirName, String password) {
+    public void writeTableToDir(String dirName) {
         Path table = Paths.get(dirName + File.separator + TABLE_FILE_NAME);
         try {
             List<String> tableContent = writeFromTable(keyTable);
@@ -76,6 +89,7 @@ public class FETable {
         for (String fileName : table.keySet()) {
             contentLines.add(fileName + ";" + table.get(fileName));
         }
+        contentLines.add(storedIv);
 
         return contentLines;
     }
@@ -84,8 +98,12 @@ public class FETable {
 
         HashMap<String,String> contentTable = new LinkedHashMap<>();
         for (String contentLine : contentLines) {
-            String[] content = contentLine.split(";");
-            contentTable.put(content[0],content[1]);
+            if (contentLine.contains(";")) {
+                String[] content = contentLine.split(";");
+                contentTable.put(content[0], content[1]);
+            } else {
+                storedIv = contentLine;
+            }
         }
 
         return contentTable;

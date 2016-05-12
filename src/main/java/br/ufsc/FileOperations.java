@@ -40,6 +40,7 @@ public class FileOperations {
 
         FETable feTable = new FETable(password);
         feTable.loadTableFromDir(dirName);
+        feTable.createNewStoredIv();
 
         List<File> list = getAllFilenamesFromDir(dirName);
 
@@ -55,7 +56,7 @@ public class FileOperations {
             }
         }
 
-        feTable.writeTableToDir(dirName, password);
+        feTable.writeTableToDir(dirName);
     }
 
     public static void decryptFiles(String dirName, String password) throws IOException {

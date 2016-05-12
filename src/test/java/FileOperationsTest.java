@@ -141,7 +141,6 @@ public class FileOperationsTest {
                         "lalalal" + File.separator + "bizarro" + File.separator + "bizarr.txt")
         };
         List<File> expectedListOfFiles = new ArrayList<>(Arrays.asList(expectedFileNames));
-        List<String> tableContent = mountTableContent(expectedListOfFiles);
         try {
             FileOperations.encryptFiles(ROOT_ENCRYPT_DIR, "senha");
             FileOperations.decryptFiles(ROOT_ENCRYPT_DIR, "senha");
@@ -150,13 +149,5 @@ public class FileOperationsTest {
         }
         List<File> actualListOfFiles = FileOperations.getAllFilenamesFromDir(ROOT_ENCRYPT_DIR);
         assertThat(actualListOfFiles, is(expectedListOfFiles));
-    }
-
-    public List<String> mountTableContent(List<File> expectedFiles) {
-        List<String> tableContent = new ArrayList<>();
-        for (File expectedFile : expectedFiles) {
-            tableContent.add(expectedFile.getPath() + ";1234567890123456");
-        }
-        return tableContent;
     }
 }
