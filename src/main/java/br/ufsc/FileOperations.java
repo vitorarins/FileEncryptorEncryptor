@@ -47,10 +47,7 @@ public class FileOperations {
         for (File theFile : list) {
             if (!TABLE_FILE_NAME.equals(theFile.getName())) {
                 String fileName = theFile.getPath();
-                String key = feTable.getKeyFromFile(fileName);
-                if (key == null) {
-                    key = feTable.setKeyForFile(fileName);
-                }
+                String key = feTable.setKeyForFile(fileName);
                 EncryptFile.encryptFile(key, fileName);
                 theFile.delete();
             }
